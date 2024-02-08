@@ -1,10 +1,11 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, createAction } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 const initialState = {
     listUsers: [],
     isLoading: false,
-    isError: false
+    isError: false,
+    userData: null
 }
 
 export const fetchAllUsers = createAsyncThunk(
@@ -47,6 +48,35 @@ export const addNewUser = createAsyncThunk(
     }
 )
 
+export const updateUser = createAsyncThunk(
+    'user/updateUser',
+    async ({ email, username, id }, thunkAPI) => {
+        try {
+            let response = await axios.put(`http://localhost:8080/users/update/${id}`, { email, username, id })
+            return response.data
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response.data);
+        }
+    }
+)
+
+export const fetchUserById = createAsyncThunk(
+    'user/fetchUserById',
+    async (userId, thunkAPI) => {
+        if (!userId) {
+            throw new Error("User ID is required");
+        }
+        try {
+            let response = await axios.get(`http://localhost:8080/users/${userId}`)
+            return response.data
+        } catch (error) {
+            return thunkAPI.rejectWithValue({ errorMessage: error.message });
+        }
+    }
+)
+
+export const clearUserIdData = createAction('user/clearUserData')
+
 export const userSlice = createSlice({
     name: 'user',
     initialState,
@@ -54,6 +84,9 @@ export const userSlice = createSlice({
         addUser(state, action) {
             state.push(action.payload);
         },
+        clearUserData(state, action) {
+            state.userData = null
+        }
     },
     extraReducers: (builder) => {
         // fetching all users
@@ -69,7 +102,6 @@ export const userSlice = createSlice({
         builder.addCase(fetchAllUsers.rejected, (state, action) => {
             state.isLoading = false;
             state.isError = true;
-            state.isError = action.error;
         })
         // delete user
         builder.addCase(deleteUser.fulfilled, (state, action) => {
@@ -77,10 +109,24 @@ export const userSlice = createSlice({
         })
         // add new user
         builder.addCase(addNewUser.fulfilled, (state, action) => {
-            state.listUsers = state.listUsers.push(action.payload)
+            state.listUsers = state.listUsers.concat(action.payload);
+        })
+        // search user by id
+        builder.addCase(fetchUserById.pending, (state, action) => {
+            state.isLoading = true;
+            state.isError = false;
+        })
+        builder.addCase(fetchUserById.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.userData = action.payload
+            state.isError = false;
+        })
+        builder.addCase(fetchUserById.rejected, (state, action) => {
+            state.isLoading = false;
+            state.isError = true;
         })
     }
 })
 
-export const { addUser } = userSlice.actions
+export const { addUser, clearUserData } = userSlice.actions
 export default userSlice.reducer

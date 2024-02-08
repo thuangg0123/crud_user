@@ -1,18 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchAllUsers, deleteUser } from "../features/userSlice";
+import FormUpdateUser from "./FormUpdateUser";
 
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
 function Table() {
   const [show, setShow] = useState(false);
+  const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [selectedUser, setSelectedUser] = useState("");
+  const [selectedUserForUpdate, setSelectedUserForUpdate] = useState("");
 
   const handleClose = () => setShow(false);
   const handleShow = (user) => {
     setShow(true);
     setSelectedUser(user);
+  };
+
+  const handleCloseModalUpdate = () => setShowModalUpdate(false);
+  const handleShowModalUpdate = (user) => {
+    setShowModalUpdate(true);
+    setSelectedUserForUpdate(user);
+    console.log(user);
   };
 
   const dispatch = useDispatch();
@@ -50,13 +60,13 @@ function Table() {
         <tbody>
           {isLoading === false && isError === true ? (
             <tr>
-              <td colSpan={4} className="text-white text-center">
+              <td colSpan={4} className="text-center">
                 Something wrong, please try again!
               </td>
             </tr>
           ) : isLoading === true && isError === false ? (
             <tr>
-              <td colSpan={4} className="text-white text-center">
+              <td colSpan={4} className="text-center">
                 Data is loading ....
               </td>
             </tr>
@@ -75,7 +85,12 @@ function Table() {
                   >
                     Delete
                   </button>
-                  <button className="btn btn-warning">Update</button>
+                  <button
+                    className="btn btn-warning"
+                    onClick={() => handleShowModalUpdate(user)}
+                  >
+                    Update
+                  </button>
                 </td>
               </tr>
             ))
@@ -104,6 +119,12 @@ function Table() {
           </Button>
         </Modal.Footer>
       </Modal>
+      <FormUpdateUser
+        showModalUpdate={showModalUpdate}
+        handleCloseModalUpdate={handleCloseModalUpdate}
+        handleShowModalUpdate={handleShowModalUpdate}
+        selectedUserForUpdate={selectedUserForUpdate}
+      />
     </div>
   );
 }

@@ -20,11 +20,22 @@ export default function FormAddNew() {
     setShow(true);
   };
 
-  const handleAddNewUser = () => {
-    dispatch(addNewUser(inforUser));
-    dispatch(fetchAllUsers());
-    setInforUser(defaultValueInput);
+  const handleAddNewUser = async () => {
+    await dispatch(
+      addNewUser({
+        email: inforUser.email,
+        password: inforUser.password,
+        username: inforUser.username,
+      })
+    );
+    await dispatch(fetchAllUsers());
+    setInforUser("");
     setShow(false);
+  };
+
+  const handleClose = () => {
+    setShow(false);
+    setInforUser("");
   };
 
   return (
@@ -32,7 +43,7 @@ export default function FormAddNew() {
       <Button className="me-2 mb-2" onClick={() => handleShow()}>
         Add new user
       </Button>
-      <Modal show={show} onHide={() => setShow(false)}>
+      <Modal show={show} onHide={() => handleClose()}>
         <Modal.Header closeButton>
           <Modal.Title>Add new user</Modal.Title>
         </Modal.Header>
