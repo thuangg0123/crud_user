@@ -64,6 +64,7 @@ const FormUpdateUser = ({
                 onChange={(event) =>
                   setInforUser({ ...inforUser, id: event.target.value })
                 }
+                disabled
               />
             </Form.Group>
             <Form.Group className="mb-3">

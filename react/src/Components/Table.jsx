@@ -54,6 +54,7 @@ function Table() {
       <table className="table">
         <thead>
           <tr>
+            <th scope="col">Index</th>
             <th scope="col">Id</th>
             <th scope="col">Email</th>
             <th scope="col">Username</th>
@@ -82,11 +83,12 @@ function Table() {
             sortedListUsers.map((user, index) => (
               <tr key={`user-${index}`}>
                 <th>{index + 1}</th>
+                <th>{user.id}</th>
                 <td>{user.email}</td>
                 <td>{user.username}</td>
                 <td>
                   <button
-                    className="btn btn-danger"
+                    className="btn btn-danger mx-3"
                     onClick={() => handleShow(user)}
                   >
                     Delete
