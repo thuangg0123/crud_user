@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchAllUsers, deleteUser } from "../features/userSlice";
 import FormUpdateUser from "./FormUpdateUser";
 
+import InputSort from "./InputSort";
+
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
@@ -11,6 +13,7 @@ function Table() {
   const [showModalUpdate, setShowModalUpdate] = useState(false);
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedUserForUpdate, setSelectedUserForUpdate] = useState("");
+  const [sortedListUsers, setSortedListUsers] = useState([]);
 
   const handleClose = () => setShow(false);
   const handleShow = (user) => {
@@ -22,28 +25,28 @@ function Table() {
   const handleShowModalUpdate = (user) => {
     setShowModalUpdate(true);
     setSelectedUserForUpdate(user);
-    console.log(user);
   };
 
   const dispatch = useDispatch();
-  const listUsers = useSelector((state) => {
-    return state.user.listUsers;
-  });
-  const isLoading = useSelector((state) => {
-    return state.user.isLoading;
-  });
-  const isError = useSelector((state) => {
-    return state.user.isError;
-  });
+  const listUsers = useSelector((state) => state.user.listUsers);
+  const isLoading = useSelector((state) => state.user.isLoading);
+  const isError = useSelector((state) => state.user.isError);
 
   useEffect(() => {
     dispatch(fetchAllUsers());
-  }, []);
+  }, [dispatch]);
+
+  useEffect(() => {
+    setSortedListUsers(listUsers);
+  }, [listUsers]);
 
   const handleDeleteUser = () => {
     dispatch(deleteUser(selectedUser.id));
-    dispatch(fetchAllUsers());
     handleClose();
+  };
+
+  const handleSortedListUsers = (sortedList) => {
+    setSortedListUsers(sortedList);
   };
 
   return (
@@ -55,6 +58,9 @@ function Table() {
             <th scope="col">Email</th>
             <th scope="col">Username</th>
             <th scope="col">Actions</th>
+            <th scope="col">
+              <InputSort handleSortedListUsers={handleSortedListUsers} />
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -71,9 +77,9 @@ function Table() {
               </td>
             </tr>
           ) : (
-            listUsers &&
-            listUsers.length > 0 &&
-            listUsers.map((user, index) => (
+            sortedListUsers &&
+            sortedListUsers.length > 0 &&
+            sortedListUsers.map((user, index) => (
               <tr key={`user-${index}`}>
                 <th>{index + 1}</th>
                 <td>{user.email}</td>

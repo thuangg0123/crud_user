@@ -75,7 +75,7 @@ export default function FormAddNew() {
               <Form.Label>Username</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Usrename"
+                placeholder="Username"
                 value={inforUser.username}
                 onChange={(event) =>
                   setInforUser({ ...inforUser, username: event.target.value })

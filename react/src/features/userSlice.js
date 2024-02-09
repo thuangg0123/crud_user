@@ -75,6 +75,18 @@ export const fetchUserById = createAsyncThunk(
     }
 )
 
+export const sortUserById = createAsyncThunk(
+    'user/sortUserById',
+    async (thunkAPI) => {
+        try {
+            let response = await axios.get(`http://localhost:8080/users/sort-by-id`)
+            return response.data.users;
+        } catch (error) {
+            return thunkAPI.rejectWithValue({ errorMessage: error.message });
+        }
+    }
+)
+
 export const clearUserIdData = createAction('user/clearUserData')
 
 export const userSlice = createSlice({
@@ -86,6 +98,9 @@ export const userSlice = createSlice({
         },
         clearUserData(state, action) {
             state.userData = null
+        },
+        setSortedUsers(state, action) {
+            state.listUsers = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -125,8 +140,22 @@ export const userSlice = createSlice({
             state.isLoading = false;
             state.isError = true;
         })
+        // sort user
+        builder.addCase(sortUserById.pending, (state, action) => {
+            state.isLoading = true;
+            state.isError = false;
+        })
+        builder.addCase(sortUserById.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.listUsers = action.payload;
+            state.isError = false;
+        })
+        builder.addCase(sortUserById.rejected, (state, action) => {
+            state.isLoading = false;
+            state.isError = true;
+        })
     }
 })
 
-export const { addUser, clearUserData } = userSlice.actions
+export const { addUser, clearUserData, setSortedUsers } = userSlice.actions
 export default userSlice.reducer
