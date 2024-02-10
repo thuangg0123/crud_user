@@ -2,6 +2,8 @@ import { createAsyncThunk, createSlice, createAction } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 const initialState = {
+    isUserLogin: null,
+    isAuthenticated: false,
     listUsers: [],
     isLoading: false,
     isError: false,
@@ -87,6 +89,19 @@ export const sortUserById = createAsyncThunk(
     }
 )
 
+export const userLogin = createAsyncThunk(
+    'user/userLogin',
+    async ({ email, password }) => {
+        try {
+            let response = await axios.post(`http://localhost:8080/users/login`, { email, password })
+            return response.data.message
+        } catch (error) {
+            console.log(error)
+            throw error;
+        }
+    }
+)
+
 export const clearUserIdData = createAction('user/clearUserData')
 
 export const userSlice = createSlice({
@@ -151,6 +166,22 @@ export const userSlice = createSlice({
             state.isError = false;
         })
         builder.addCase(sortUserById.rejected, (state, action) => {
+            state.isLoading = false;
+            state.isError = true;
+        })
+        // user login
+        builder.addCase(userLogin.pending, (state, action) => {
+            state.isLoading = true;
+            state.isAuthenticated = false
+            state.isError = false;
+        })
+        builder.addCase(userLogin.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.isUserLogin = action.payload;
+            state.isAuthenticated = true
+            state.isError = false;
+        })
+        builder.addCase(userLogin.rejected, (state, action) => {
             state.isLoading = false;
             state.isError = true;
         })
