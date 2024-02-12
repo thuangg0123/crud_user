@@ -92,11 +92,11 @@ const FormUpdateUser = ({
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModalUpdate}>
-            Close
-          </Button>
           <Button variant="primary" onClick={() => handleConfirmUpdate()}>
             Confirm
+          </Button>
+          <Button variant="secondary" onClick={handleCloseModalUpdate}>
+            Close
           </Button>
         </Modal.Footer>
       </Modal>

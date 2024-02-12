@@ -8,6 +8,8 @@ import { toast } from "react-toastify";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
+import "./style.scss";
+
 function SearchUser() {
   const [show, setShow] = useState(false);
   const [userId, setUserId] = useState("");
@@ -16,8 +18,9 @@ function SearchUser() {
   const handleClose = () => {
     dispatch(clearUserData());
     setShow(false);
-    window.location.reload();
+    // window.location.reload();
   };
+
   const handleShow = () => setShow(true);
   const userData = useSelector((state) => state.user.userData);
   const loading = useSelector((state) => state.user.loading);
@@ -34,6 +37,13 @@ function SearchUser() {
     }
   };
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setUserId(value);
+    }
+  };
+
   useEffect(() => {
     if (debouncedUserId.trim() !== "") {
       handleSearch();
@@ -41,13 +51,19 @@ function SearchUser() {
   }, [debouncedUserId]);
 
   return (
-    <div className="text-white">
-      <input
-        type="text"
-        value={userId}
-        onChange={(e) => setUserId(e.target.value)}
-      />
-      <button onClick={handleSearch}>Search</button>
+    <>
+      <div className="text-white search-container">
+        <input
+          className="search-input"
+          type="text"
+          value={userId}
+          onChange={handleInputChange}
+          placeholder="Enter the user ID you want to search for (only numbers are allowed)."
+        />
+        <button className="btn btn-primary" onClick={handleSearch}>
+          Search
+        </button>
+      </div>
       <Modal
         show={show}
         onHide={handleClose}
@@ -55,7 +71,7 @@ function SearchUser() {
         keyboard={false}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Information user by id</Modal.Title>
+          <Modal.Title>Information user by ID</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {loading && <p>Loading...</p>}
@@ -82,7 +98,7 @@ function SearchUser() {
           </Button>
         </Modal.Footer>
       </Modal>
-    </div>
+    </>
   );
 }
 

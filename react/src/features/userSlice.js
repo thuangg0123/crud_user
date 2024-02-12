@@ -10,51 +10,84 @@ const initialState = {
     userData: null
 }
 
+const getToken = () => {
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+        throw new Error('No JWT token found in localStorage');
+    }
+    return token;
+};
+
 export const fetchAllUsers = createAsyncThunk(
     'user/fetchAllUsers',
     async () => {
         try {
-            let response = await axios.get('http://localhost:8080/users/all')
-            return response.data
+            const token = getToken();
+            const response = await axios.get('http://localhost:8080/users/all', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            throw error;
         }
     }
-)
+);
 
 export const deleteUser = createAsyncThunk(
     'user/deleteUser',
     async (id) => {
         try {
-            let response = await axios.post(`http://localhost:8080/users/delete/${id}`)
-            return response.data
+            const token = getToken();
+            let response = await axios.post(`http://localhost:8080/users/delete/${id}`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            throw error;
         }
     }
-)
+);
 
 export const addNewUser = createAsyncThunk(
     'user/addNewUser',
     async ({ email, password, username }) => {
         try {
+            const token = getToken();
             let response = await axios.post(`http://localhost:8080/users/create`, {
                 email: email,
                 password: password,
                 username: username
-            })
-            return response.data
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            throw error;
         }
     }
-)
+);
 
 export const updateUser = createAsyncThunk(
     'user/updateUser',
     async ({ email, username, id }, thunkAPI) => {
         try {
-            let response = await axios.put(`http://localhost:8080/users/update/${id}`, { email, username, id })
+            const token = getToken();
+            let response = await axios.put(`http://localhost:8080/users/update/${id}`,
+                { email, username, id },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
             return response.data
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response.data);
@@ -69,7 +102,12 @@ export const fetchUserById = createAsyncThunk(
             throw new Error("User ID is required");
         }
         try {
-            let response = await axios.get(`http://localhost:8080/users/${userId}`)
+            const token = getToken();
+            let response = await axios.get(`http://localhost:8080/users/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
             return response.data
         } catch (error) {
             return thunkAPI.rejectWithValue({ errorMessage: error.message });
@@ -81,8 +119,31 @@ export const sortUserById = createAsyncThunk(
     'user/sortUserById',
     async (thunkAPI) => {
         try {
-            let response = await axios.get(`http://localhost:8080/users/sort-by-id`)
+            const token = getToken();
+            let response = await axios.get(`http://localhost:8080/users/sort-by-id`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
             return response.data.users;
+        } catch (error) {
+            return thunkAPI.rejectWithValue({ errorMessage: error.message });
+        }
+    }
+)
+
+export const importUserFileCSV = createAsyncThunk(
+    'user/importUserFileCSV',
+    async (formData, thunkAPI) => {
+        try {
+            const token = getToken();
+            let response = await axios.post(`http://localhost:8080/users/import-csv`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                },
+            })
+            return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue({ errorMessage: error.message });
         }
@@ -94,7 +155,7 @@ export const userLogin = createAsyncThunk(
     async ({ email, password }) => {
         try {
             let response = await axios.post(`http://localhost:8080/users/login`, { email, password })
-            return response.data.message
+            return response.data
         } catch (error) {
             console.log(error)
             throw error;
@@ -153,7 +214,7 @@ export const userSlice = createSlice({
         })
         builder.addCase(fetchUserById.rejected, (state, action) => {
             state.isLoading = false;
-            state.isError = true;
+            state.isError = false;
         })
         // sort user
         builder.addCase(sortUserById.pending, (state, action) => {
@@ -171,17 +232,23 @@ export const userSlice = createSlice({
         })
         // user login
         builder.addCase(userLogin.pending, (state, action) => {
-            state.isLoading = true;
             state.isAuthenticated = false
-            state.isError = false;
         })
         builder.addCase(userLogin.fulfilled, (state, action) => {
-            state.isLoading = false;
             state.isUserLogin = action.payload;
             state.isAuthenticated = true
+        })
+        // import user from file csv
+        builder.addCase(importUserFileCSV.pending, (state, action) => {
+            state.isLoading = true;
             state.isError = false;
         })
-        builder.addCase(userLogin.rejected, (state, action) => {
+        builder.addCase(importUserFileCSV.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.listUsers = action.payload;
+            state.isError = false;
+        })
+        builder.addCase(importUserFileCSV.rejected, (state, action) => {
             state.isLoading = false;
             state.isError = true;
         })

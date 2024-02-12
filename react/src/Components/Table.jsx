@@ -65,16 +65,16 @@ function Table() {
           </tr>
         </thead>
         <tbody>
-          {isLoading === false && isError === true ? (
-            <tr>
-              <td colSpan={4} className="text-center">
-                Something wrong, please try again!
-              </td>
-            </tr>
-          ) : isLoading === true && isError === false ? (
+          {isLoading && !isError ? (
             <tr>
               <td colSpan={4} className="text-center">
                 Data is loading ....
+              </td>
+            </tr>
+          ) : isError ? (
+            <tr>
+              <td colSpan={4} className="text-center">
+                Something wrong, please try again!
               </td>
             </tr>
           ) : (
@@ -116,14 +116,14 @@ function Table() {
         </Modal.Header>
         <Modal.Body>Are you sure you want to delete user ?</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
           <Button
             className="btn btn-primary"
             onClick={() => handleDeleteUser()}
           >
             Confirm
+          </Button>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
           </Button>
         </Modal.Footer>
       </Modal>

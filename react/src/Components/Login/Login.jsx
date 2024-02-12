@@ -9,24 +9,18 @@ import { userLogin } from "../../features/userSlice";
 
 function Login() {
   let navigate = useNavigate();
-  const isUserLogin = useSelector((state) => {
-    return state.user.isUserLogin;
-  });
   const isAuthenticated = useSelector((state) => {
     return state.user.isAuthenticated;
   });
-  const isLoading = useSelector((state) => {
-    return state.user.isLoading;
-  });
-  const isError = useSelector((state) => {
-    return state.user.isError;
-  });
 
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //     navigate("/");
-  //   }
-  // }, [isAuthenticated, navigate]);
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    if (isAuthenticated || token) {
+      navigate("/");
+    } else {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
 
   const dispatch = useDispatch();
   const defaultValueInput = {
@@ -48,8 +42,10 @@ function Login() {
 
       const response = await dispatch(userLogin({ email, password }));
       if (response.payload) {
-        toast.success(response.payload);
-        setTimeout(() => {
+        const token = response.payload.data.access_token;
+        localStorage.setItem("jwt", token);
+        await toast.success(response.message);
+        await setTimeout(() => {
           navigate("/");
         }, 1000);
       } else {
