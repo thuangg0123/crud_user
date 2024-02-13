@@ -150,6 +150,31 @@ export const importUserFileCSV = createAsyncThunk(
     }
 )
 
+export const exportFileUsers = createAsyncThunk(
+    'user/exportFileUsers',
+    async (thunkAPI) => {
+        try {
+            const token = getToken();
+            const response = await axios.get(`http://localhost:8080/users/export-csv`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                responseType: 'blob' // Chỉ định kiểu dữ liệu của response là blob
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data])); // Tạo URL từ blob response
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'users.csv'); // Thiết lập tên tập tin và download
+            document.body.appendChild(link);
+            link.click(); // Kích hoạt sự kiện click trên link để tải xuống file
+            link.parentNode.removeChild(link); // Xóa link sau khi tải xuống
+        } catch (error) {
+            console.error('Error exporting file:', error);
+        }
+    }
+)
+
 export const userLogin = createAsyncThunk(
     'user/userLogin',
     async ({ email, password }) => {

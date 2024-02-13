@@ -8,6 +8,7 @@ import { ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 import { useSelector } from "react-redux";
+import ExportUsers from "../ExportUsers";
 
 function Home() {
   const isUserLogin = useSelector((state) => {
@@ -23,6 +24,7 @@ function Home() {
       <button onClick={() => hanldeGoToLogin()}>Login</button>
       <SearchUser />
       <div>
+        <ExportUsers />
         <ImportUser />
         <FormAddNew />
       </div>
