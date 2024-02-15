@@ -5,6 +5,7 @@ import Form from "react-bootstrap/Form";
 
 import { addNewUser, fetchAllUsers } from "../features/userSlice";
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 export default function FormAddNew() {
   const dispatch = useDispatch();
@@ -21,14 +22,20 @@ export default function FormAddNew() {
   };
 
   const handleAddNewUser = async () => {
-    await dispatch(
+    let response = await dispatch(
       addNewUser({
         email: inforUser.email,
         password: inforUser.password,
         username: inforUser.username,
       })
     );
+    console.log(response);
     await dispatch(fetchAllUsers());
+    if (response.payload.errCode === 0) {
+      toast.success(response.payload.message);
+    } else {
+      toast.error(response.payload.message);
+    }
     setInforUser("");
     setShow(false);
   };

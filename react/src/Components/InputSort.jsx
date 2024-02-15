@@ -19,11 +19,11 @@ function InputSort(props) {
           toast.success("Users sorted by id successfully");
         } else {
           console.error("Error sorting users:", resultAction.error.message);
-          toast.error(resultAction.error.message);
+          toast.error("Sort list users by id is failed");
         }
       } catch (error) {
         console.error("Error sorting users:", error.message);
-        toast.error(error.message);
+        toast.error("Sort list users by id is failed");
       }
     }
   };

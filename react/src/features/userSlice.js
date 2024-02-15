@@ -2,8 +2,9 @@ import { createAsyncThunk, createSlice, createAction } from '@reduxjs/toolkit'
 import axios from 'axios'
 
 const initialState = {
-    isUserLogin: null,
-    isAuthenticated: false,
+    isUserLogin: {
+        isAuthenticated: false,
+    },
     listUsers: [],
     isLoading: false,
     isError: false,
@@ -11,7 +12,7 @@ const initialState = {
 }
 
 const getToken = () => {
-    const token = localStorage.getItem('jwt');
+    const token = localStorage.getItem('token');
     if (!token) {
         throw new Error('No JWT token found in localStorage');
     }
@@ -189,6 +190,8 @@ export const userLogin = createAsyncThunk(
 )
 
 export const clearUserIdData = createAction('user/clearUserData')
+export const loadUserDataFromLocalStorage = createAction('user/loadUserDataFromLocalStorage')
+export const logoutUser = createAction('user/logoutUser')
 
 export const userSlice = createSlice({
     name: 'user',
@@ -228,28 +231,15 @@ export const userSlice = createSlice({
             state.listUsers = state.listUsers.concat(action.payload);
         })
         // search user by id
-        builder.addCase(fetchUserById.pending, (state, action) => {
-            state.isLoading = true;
-            state.isError = false;
-        })
         builder.addCase(fetchUserById.fulfilled, (state, action) => {
-            state.isLoading = false;
             state.userData = action.payload
-            state.isError = false;
-        })
-        builder.addCase(fetchUserById.rejected, (state, action) => {
-            state.isLoading = false;
-            state.isError = false;
         })
         // sort user
         builder.addCase(sortUserById.pending, (state, action) => {
-            state.isLoading = true;
-            state.isError = false;
+            state.listUsers = [];
         })
         builder.addCase(sortUserById.fulfilled, (state, action) => {
-            state.isLoading = false;
             state.listUsers = action.payload;
-            state.isError = false;
         })
         builder.addCase(sortUserById.rejected, (state, action) => {
             state.isLoading = false;
@@ -261,8 +251,42 @@ export const userSlice = createSlice({
         })
         builder.addCase(userLogin.fulfilled, (state, action) => {
             state.isUserLogin = action.payload;
-            state.isAuthenticated = true
+            state.isUserLogin.isAuthenticated = true
+
+            localStorage.setItem("token", action.payload.data.access_token);
+            localStorage.setItem("email", action.payload.data.email);
+            localStorage.setItem("username", action.payload.data.username);
         })
+        builder.addCase(userLogin.rejected, (state, action) => {
+            state.isUserLogin = action.payload;
+            state.isUserLogin.isAuthenticated = false
+        })
+        //load data from localStorage
+        builder.addCase(loadUserDataFromLocalStorage, (state, action) => {
+            const access_token = localStorage.getItem("token");
+            const username = localStorage.getItem("username");
+            const email = localStorage.getItem("email");
+            if (access_token && username && email) {
+                state.isUserLogin = {
+                    isAuthenticated: true,
+                    data: {
+                        access_token: access_token,
+                        username: username,
+                        email: email
+                    }
+                };
+            }
+        });
+        //log out
+        builder.addCase(logoutUser, (state, action) => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("username");
+            localStorage.removeItem("email");
+
+            state.isUserLogin = {
+                isAuthenticated: false
+            };
+        });
         // import user from file csv
         builder.addCase(importUserFileCSV.pending, (state, action) => {
             state.isLoading = true;

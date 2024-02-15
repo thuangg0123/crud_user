@@ -33,6 +33,8 @@ const ImportUserModal = () => {
       } else {
         if (response.payload.status === 422) {
           toast.error("CSV file is not formatted correctly");
+        } else if (response.payload.data.errorCode === 1) {
+          toast.error("The email is already exist");
         } else {
           toast.error(response.payload.data.message);
         }
@@ -48,7 +50,7 @@ const ImportUserModal = () => {
 
   return (
     <>
-      <Button className="me-2 mb-2" onClick={handleShowModal}>
+      <Button className="me-2 mb-2 btn btn-secondary" onClick={handleShowModal}>
         Import user
       </Button>
       <Modal show={showModal} onHide={handleCloseModal}>

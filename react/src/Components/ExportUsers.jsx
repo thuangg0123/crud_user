@@ -12,7 +12,10 @@ export default function ExportUsers() {
   };
   return (
     <>
-      <Button className="me-2 mb-2" onClick={() => handleExportUsers()}>
+      <Button
+        className="me-2 mb-2 btn btn-success"
+        onClick={() => handleExportUsers()}
+      >
         Export file users
       </Button>
     </>
