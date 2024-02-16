@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchAllUsers, deleteUser } from "../features/userSlice";
-import FormUpdateUser from "./FormUpdateUser";
+import { toast } from "react-toastify";
 
 import InputSort from "./InputSort";
+import FormUpdateUser from "./FormUpdateUser";
 
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
@@ -31,17 +32,25 @@ function Table() {
   const listUsers = useSelector((state) => state.user.listUsers);
   const isLoading = useSelector((state) => state.user.isLoading);
   const isError = useSelector((state) => state.user.isError);
+  const isUserLogin = useSelector((state) => state.user.isUserLogin);
 
   useEffect(() => {
-    dispatch(fetchAllUsers());
+    if (isUserLogin.isAuthenticated === true) {
+      dispatch(fetchAllUsers());
+    }
   }, [dispatch]);
 
   useEffect(() => {
     setSortedListUsers(listUsers);
   }, [listUsers]);
 
-  const handleDeleteUser = () => {
-    dispatch(deleteUser(selectedUser.id));
+  const handleDeleteUser = async () => {
+    let response = await dispatch(deleteUser(selectedUser.id));
+    if (response && response.payload.errCode === 0) {
+      await toast.success(response.payload.message);
+    } else {
+      toast.error(response.payload.message);
+    }
     handleClose();
   };
 
@@ -88,16 +97,16 @@ function Table() {
                 <td>{user.username}</td>
                 <td>
                   <button
-                    className="btn btn-danger mx-3"
-                    onClick={() => handleShow(user)}
-                  >
-                    Delete
-                  </button>
-                  <button
                     className="btn btn-warning"
                     onClick={() => handleShowModalUpdate(user)}
                   >
                     Update
+                  </button>
+                  <button
+                    className="btn btn-danger mx-3"
+                    onClick={() => handleShow(user)}
+                  >
+                    Delete
                   </button>
                 </td>
               </tr>

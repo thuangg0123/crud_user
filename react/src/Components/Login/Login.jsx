@@ -5,7 +5,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 
-import { userLogin } from "../../features/userSlice";
+import {
+  userLogin,
+  loadUserDataFromLocalStorage,
+} from "../../features/userSlice";
 
 function Login() {
   let navigate = useNavigate();
@@ -21,8 +24,16 @@ function Login() {
   const [valueInput, setValueInput] = useState(defaultValueInput);
 
   useEffect(() => {
+    if (localStorage.getItem("token")) {
+      dispatch(loadUserDataFromLocalStorage());
+    }
+  }, []);
+
+  useEffect(() => {
     if (isUserLogin && isUserLogin.isAuthenticated === false) {
       navigate("/login");
+    } else {
+      navigate("/");
     }
   }, [isUserLogin]);
 
@@ -32,20 +43,23 @@ function Login() {
       if (!email || !password) {
         toast.error("Please enter email and password");
         return;
-      } else if (email.length < 8 || password.length < 6) {
-        toast.error("Email/password length must be greater than 6");
+      } else if (password.length < 6) {
+        toast.error("Password length must be greater than 6");
+        return;
+      } else if (email.length < 8) {
+        toast.error("Email length must be greater than 8");
         return;
       }
 
       const response = await dispatch(userLogin({ email, password }));
       console.log(response);
-      if (response.payload) {
-        await toast.success(response.message);
+      if (response && response.payload.errCode === 0) {
+        await toast.success(response.payload.message);
         await setTimeout(() => {
           navigate("/");
         }, 1000);
       } else {
-        toast.error("Email or password is incorrect");
+        toast.error(response.payload.message);
       }
     } catch (error) {
       console.error("Error:", error);

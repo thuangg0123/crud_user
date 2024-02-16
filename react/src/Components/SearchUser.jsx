@@ -18,7 +18,6 @@ function SearchUser() {
   const handleClose = () => {
     dispatch(clearUserData());
     setShow(false);
-    // window.location.reload();
   };
 
   const handleShow = () => setShow(true);

@@ -3,13 +3,14 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 
+import { toast } from "react-toastify";
+
 import { useDispatch } from "react-redux";
 import { updateUser, fetchAllUsers } from "../features/userSlice";
 
 const FormUpdateUser = ({
   showModalUpdate,
   handleCloseModalUpdate,
-  handleShowModalUpdate,
   selectedUserForUpdate,
 }) => {
   const defaultValueInput = {
@@ -21,14 +22,19 @@ const FormUpdateUser = ({
   const dispatch = useDispatch();
 
   const handleConfirmUpdate = async () => {
-    await dispatch(
+    let response = await dispatch(
       updateUser({
         id: selectedUserForUpdate.id,
         email: inforUser.email,
         username: inforUser.username,
       })
     );
-    dispatch(fetchAllUsers());
+    if (response && response.payload.errCode === 0) {
+      dispatch(fetchAllUsers());
+      toast.success(response.payload.message);
+    } else {
+      toast.error(response.payload.message);
+    }
     handleCloseModalUpdate();
   };
 

@@ -31,7 +31,6 @@ export const fetchAllUsers = createAsyncThunk(
             });
             return response.data;
         } catch (error) {
-            console.log(error);
             throw error;
         }
     }
@@ -49,7 +48,6 @@ export const deleteUser = createAsyncThunk(
             });
             return response.data;
         } catch (error) {
-            console.log(error);
             throw error;
         }
     }
@@ -71,7 +69,6 @@ export const addNewUser = createAsyncThunk(
             });
             return response.data;
         } catch (error) {
-            console.log(error);
             throw error;
         }
     }
@@ -116,17 +113,17 @@ export const fetchUserById = createAsyncThunk(
     }
 )
 
-export const sortUserById = createAsyncThunk(
-    'user/sortUserById',
-    async (thunkAPI) => {
+export const sortUser = createAsyncThunk(
+    'user/sortUser',
+    async (sortBy, thunkAPI) => {
         try {
             const token = getToken();
-            let response = await axios.get(`http://localhost:8080/users/sort-by-id`, {
+            let response = await axios.get(`http://localhost:8080/users/sort-list-users?sortBy=${sortBy}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
-            return response.data.users;
+            return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue({ errorMessage: error.message });
         }
@@ -178,13 +175,12 @@ export const exportFileUsers = createAsyncThunk(
 
 export const userLogin = createAsyncThunk(
     'user/userLogin',
-    async ({ email, password }) => {
+    async ({ email, password }, { rejectWithValue }) => {
         try {
             let response = await axios.post(`http://localhost:8080/users/login`, { email, password })
             return response.data
         } catch (error) {
-            console.log(error)
-            throw error;
+            return rejectWithValue(error.response.data);
         }
     }
 )
@@ -235,13 +231,13 @@ export const userSlice = createSlice({
             state.userData = action.payload
         })
         // sort user
-        builder.addCase(sortUserById.pending, (state, action) => {
+        builder.addCase(sortUser.pending, (state, action) => {
             state.listUsers = [];
         })
-        builder.addCase(sortUserById.fulfilled, (state, action) => {
+        builder.addCase(sortUser.fulfilled, (state, action) => {
             state.listUsers = action.payload;
         })
-        builder.addCase(sortUserById.rejected, (state, action) => {
+        builder.addCase(sortUser.rejected, (state, action) => {
             state.isLoading = false;
             state.isError = true;
         })
@@ -258,7 +254,6 @@ export const userSlice = createSlice({
             localStorage.setItem("username", action.payload.data.username);
         })
         builder.addCase(userLogin.rejected, (state, action) => {
-            state.isUserLogin = action.payload;
             state.isUserLogin.isAuthenticated = false
         })
         //load data from localStorage

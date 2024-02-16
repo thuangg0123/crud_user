@@ -29,7 +29,7 @@ const ImportUserModal = () => {
       formData.append("file", selectedFile);
       const response = await dispatch(importUserFileCSV(formData));
       if (response.payload.data.errCode === 0) {
-        toast.success(response.payload.data.message);
+        await toast.success(response.payload.data.message);
       } else {
         if (response.payload.status === 422) {
           toast.error("CSV file is not formatted correctly");
@@ -44,8 +44,8 @@ const ImportUserModal = () => {
       toast.error("CSV file is not formatted correctly");
       handleCloseModal();
     }
-    dispatch(fetchAllUsers());
     setSelectedFile("");
+    await dispatch(fetchAllUsers());
   };
 
   return (
